@@ -39,9 +39,6 @@ class Admin : User
     {
         Console.WriteLine("1.\tManage Employee\n2.\tPlace Order\n3.\tSee all orders\n4.\tExit\n");
     }
-
-
-
 }
 
 class Employee : User

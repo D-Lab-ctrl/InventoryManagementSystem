@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 class UserService
 {   
@@ -99,29 +100,36 @@ class UserService
             if (!string.IsNullOrEmpty(input))
             {
                 RepositoryUser repo = new RepositoryUser();
-                Tuple<string, string, string, string> value = repo.CheckCredentials(input);
-                
-                Console.WriteLine("Enter the password: ");
-                string? password = Console.ReadLine();
-                if (!string.IsNullOrEmpty(password))
+                var value = repo.CheckCredentials(input);
+                if (value == null)
                 {
-                    string? passwordHash = createPasswordHash(password, value.Item4);
-                    if (value.Item3 == passwordHash && value.Item1 == input)
-                    {
-                        Console.WriteLine("You are logged in!\n");
-                        var user = CreateUserByRole(value.Item1, value.Item2);
-                        return user;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Either the username or password you entered is wrong.");
-                        continue;
-                    }
+                    Console.WriteLine("Username not found");
+                    continue;
                 }
                 else
                 {
-                    Console.WriteLine("The password cannot be empty or null");
-                    continue;
+                    Console.WriteLine("Enter the password: ");
+                    string? password = Console.ReadLine();
+                    if (!string.IsNullOrEmpty(password))
+                    {
+                        string? passwordHash = createPasswordHash(password, value.salt);
+                        if (value.passwordHash == passwordHash)
+                        {
+                            Console.WriteLine("You are logged in!\n");
+                            var user = CreateUserByRole(value.Username, value.Role);
+                            return user;
+                        }
+                        else
+                        {
+                            Console.WriteLine("The password you entered is wrong.");
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("The password cannot be empty or null");
+                        continue;
+                    }
                 }
             }
             else
@@ -159,6 +167,7 @@ class UserService
         else
         {
             string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[^\s]+$";
+            
             if(Regex.IsMatch(input, pattern) && input.Length >= 8)
             {
                 return true;
