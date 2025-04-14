@@ -11,39 +11,61 @@ class UserService
     }
 
     //define a method to create an user 
-    public User CreateUser()
+    public User? CreateUser()
     {
         //Define a list of acceptable roles to define as credential of the user to register
-        List<string> roles = ["Admin", "Employee"];
-        Console.WriteLine("Enter a Username: ");
-        string? username = Console.ReadLine();
-        if (!string.IsNullOrEmpty(username))
-        {
-            Console.WriteLine("Enter the role: ");
-            string? role = Console.ReadLine();
-            if (roles.Contains(role))
+        List<string> roles = new List<string>{"Admin", "Employee"};
+        //Define while loops to iterate over and over until all the registration criterias are met
+        while (true)
+        {   
+            Console.WriteLine("Enter a Username: ");
+            string? username = Console.ReadLine();
+            if (!string.IsNullOrEmpty(username))
             {
-                Console.WriteLine("Enter a password: ");
-                string? inputPassword = Console.ReadLine();
+                while (true)
+                {
+                    Console.WriteLine("Enter the role: ");
+                    string? role = Console.ReadLine();
+                    if (!string.IsNullOrEmpty(role))
+                    {
+                        if (roles.Contains(role))
+                        {
+                            while (true)
+                            {
+                                Console.WriteLine("Enter a password: ");
+                                string? inputPassword = Console.ReadLine();
 
-                //call password generator code and return hash password and salt
-                //create user object then generate password and salt and assign them to the object fields.
+                                if (passwordValidation(inputPassword))
+                                {
+                                    //call password generator code and return hash password and salt
+                                    //create user object then generate password and salt and assign them to the object fields.
 
-                var user = CreateUserByRole(username, role);
-                user.salt = createSalt();
-                user.passwordHash = createPasswordHash(inputPassword, user.salt);
-                return user;
+                                    var user = CreateUserByRole(username, role);
+                                    user.salt = createSalt();
+                                    user.passwordHash = createPasswordHash(inputPassword, user.salt);
+                                    return user;
+                                }
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("The role inserted is not valid.\nIt must be either 'Admin' or 'Employee'");
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("The role cannot be empty or null.");
+                        continue;
+                    }
+                }
             }
             else
             {
-                Console.WriteLine("The role inserted is not valid.");
-                return null;
+                Console.WriteLine("Username cannot be empty or null.");
+                continue;
             }
-        }
-        else
-        {
-            Console.WriteLine("Username cannot be empty or null.");
-            return null;
         }
     }
 
@@ -52,39 +74,61 @@ class UserService
     {
         var user = CreateUser();
         RepositoryUser repo = new RepositoryUser();
-        repo.Add(user);
+        try
+        {
+            repo.Add(user);
+            Console.WriteLine("Registration completed!");
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("Registration failed!");
+            Console.WriteLine(ex.Message);
+        }
+        
     }
 
     //Define a method where the user give in input username and password and then the result fetched by
     //the repository is compared with the input to see if there is a match and therefore if the login is valid
-    public User LogIn()
+    //add while loop to keep trying to log in
+    public User? LogIn()
     {
-        Console.WriteLine("Enter your Username: ");
-        string? input = Console.ReadLine();
-        RepositoryUser repo = new RepositoryUser();
-        Tuple<string, string, string> value = repo.CheckUsername(input);
-        if (value.Item1 == input)
+        while (true)
         {
-            Console.WriteLine("Enter the password: ");
-            string? password = Console.ReadLine();
-            string? passwordHash = createPasswordHash(password, value.Item2);
-            string? secondValue = repo.CheckPassword(value.Item1, passwordHash);
-            if(secondValue == passwordHash)
+            Console.WriteLine("Enter your Username: ");
+            string? input = Console.ReadLine();
+            if (!string.IsNullOrEmpty(input))
             {
-                Console.WriteLine("You are logged in!\n");
-                var user = CreateUserByRole(value.Item1, value.Item3);
-                return user;                
+                RepositoryUser repo = new RepositoryUser();
+                Tuple<string, string, string, string> value = repo.CheckCredentials(input);
+                
+                Console.WriteLine("Enter the password: ");
+                string? password = Console.ReadLine();
+                if (!string.IsNullOrEmpty(password))
+                {
+                    string? passwordHash = createPasswordHash(password, value.Item4);
+                    if (value.Item3 == passwordHash && value.Item1 == input)
+                    {
+                        Console.WriteLine("You are logged in!\n");
+                        var user = CreateUserByRole(value.Item1, value.Item2);
+                        return user;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Either the username or password you entered is wrong.");
+                        continue;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("The password cannot be empty or null");
+                    continue;
+                }
             }
             else
             {
-                Console.WriteLine("Wrong Password.");
-                return null;
+                Console.WriteLine("Username cannot be empty or null.");
+                continue;
             }
-        }
-        else
-        {
-            Console.WriteLine("Username not found!");
-            return null;
         }
     }
     public string createSalt()
@@ -105,4 +149,22 @@ class UserService
             ));
     }
 
+    public bool passwordValidation(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            Console.WriteLine("The password cannot be empty or null.");
+            return false;
+        }
+        else
+        {
+            string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[^\s]+$";
+            if(Regex.IsMatch(input, pattern) && input.Length >= 8)
+            {
+                return true;
+            }
+            Console.WriteLine("The password must be longer than 8 characters and contain at least:\n1 Capitol letter\n1 Number\n1 Special character\nNo spaces.");
+            return false;
+        }
+    }
 }

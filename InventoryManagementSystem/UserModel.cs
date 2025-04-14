@@ -1,5 +1,4 @@
 ﻿using System;
-
 abstract class User
 {
     //Define properties of the user object 
@@ -30,7 +29,6 @@ abstract class User
     {
         Console.WriteLine("1.\tPlace Order\n2.\tSee all orders\n3.\tExit\n");
     }
-
 }
 //create 2 classes that inherit from the user class
 class Admin : User
@@ -41,6 +39,9 @@ class Admin : User
     {
         Console.WriteLine("1.\tManage Employee\n2.\tPlace Order\n3.\tSee all orders\n4.\tExit\n");
     }
+
+
+
 }
 
 class Employee : User

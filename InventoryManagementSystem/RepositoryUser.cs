@@ -1,6 +1,5 @@
 ﻿using System;
 using MySql.Data.MySqlClient;
-using Microsoft.Extensions.Configuration.Json;
 
 //create a repository, which acts as intermediary between the code and the sql server
 class RepositoryUser
@@ -33,14 +32,14 @@ class RepositoryUser
         }
     }
     //Define a method that check if the username is present in the database
-    //The method will return a tuple with username and salt
+    //The method will return a tuple with username, role, password and salt
     //The salt is neccessary to generate a hashed password 
-    public Tuple<string, string, string> CheckUsername(string name)
+    public Tuple<string, string, string, string> CheckCredentials(string name)
     {
         using(MySqlConnection connection = new MySqlConnection(_connectionString))
         {   
             //The query select the cell where the username is the name inserted by the user during the login
-            string query = "SELECT Username, Salt, Role FROM Users WHERE Username = @name";
+            string query = "SELECT Username, Role, Password, Salt FROM Users WHERE Username = @name";
             MySqlCommand cmd = new MySqlCommand(query, connection);
             connection.Open();
             cmd.Parameters.AddWithValue("@name", name);
@@ -49,30 +48,15 @@ class RepositoryUser
             {
                 if (reader.Read())
                 {
-                    string username = reader["Username"].ToString();
-                    string salt = reader["Salt"].ToString();
-                    string role = reader["Role"].ToString();
+                    string? username = reader["Username"].ToString();
+                    string? role = reader["Role"].ToString();
+                    string? password = reader["Password"].ToString();
+                    string? salt = reader["Salt"].ToString();
 
-                    return Tuple.Create(username, salt, role);
+                    return Tuple.Create(username, role, password, salt);
                 }
-                return Tuple.Create("", "", "");
+                return Tuple.Create("", "", "", "");
             }
-        }
-    }
-    //Define a method to check if the password is in the database 
-    public string CheckPassword(string name, string password)
-    {
-        using (MySqlConnection connection = new MySqlConnection(_connectionString))
-        {
-            //The query select the cell where the username is the name inserted by the user during the login
-            string query = "SELECT Password FROM Users WHERE Username = @name AND Password = @password";
-            MySqlCommand cmd = new MySqlCommand(query, connection);
-            connection.Open();
-            cmd.Parameters.AddWithValue("@password", password);
-            cmd.Parameters.AddWithValue("@name", name);
-            //The executescalar method retrieves data from the table
-            string value = (string)cmd.ExecuteScalar();
-            return value;
         }
     }
 }

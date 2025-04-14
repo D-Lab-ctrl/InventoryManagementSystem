@@ -6,24 +6,34 @@ namespace InventoryManagementSystem
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("1.\tLogin\n2.\tRegister\n");
-            int choice = Convert.ToInt32(Console.ReadLine());
-            if(choice == 1)
-            {
-                UserService login = new UserService();
-                var user = login.LogIn();
-                if(user != null)
-                {
-                    user.Options();
-                }
-                
-            }            
-            if(choice == 2)
-            {
-                UserService registration = new UserService();
-                registration.registerUser();
+            Console.WriteLine("1.\tLogin\n2.\tRegister\n3.\tExit");
 
+            if (int.TryParse(Console.ReadLine(), out int choice))
+            {
+                if (choice == 1)
+                {
+                    UserService login = new UserService();
+                    var user = login.LogIn();
+                    if (user != null)
+                    {
+                        user.Options();
+                    }
+                }
+                else if (choice == 2)
+                {
+                    UserService registration = new UserService();
+                    registration.registerUser();
+                }
+                else if (choice == 3)
+                {
+                    return;
+                }
             }
+            else
+            {
+                Console.WriteLine("You must insert a number (1, 2 or 3) corresponding to the option number.");
+            }
+
         }
     }
 }
