@@ -223,28 +223,37 @@ class UserService
                 case 1:
                     Console.WriteLine("Enter the user's username you want to edit the role of: ");
                     string username = Console.ReadLine();
-                    Console.WriteLine("Enter the new role: ");
-                    string role = Console.ReadLine();
-                    User userToEdit = repo.CheckCredentials(username);
-                    if (userToEdit.Role == "Admin")
+                    if (repo.UsernameList(username).Contains(username))
                     {
-                        Console.WriteLine("Cannot change admin credentials!");
+                        Console.WriteLine("Enter the new role: ");
+                        string role = Console.ReadLine();
+                        User userToEdit = repo.CheckCredentials(username);
+                        if (userToEdit.Role == "Admin")
+                        {
+                            Console.WriteLine("Cannot change admin credentials!");
+                        }
+                        else
+                        {
+                            repo.EditUserRole(username, role);
+                        }
+                        break;
                     }
                     else
                     {
-                        repo.EditUserRole(username, role);
+                        Console.WriteLine("No username found!");
+                        break;
                     }
-                    break;
+                        
                 case 2:
                     Console.WriteLine("Enter the user's username to delete: ");
                     string? name = Console.ReadLine();
-                    User usertodelete = repo.CheckCredentials(name);
-                    if(usertodelete != null)
+                    if (repo.UsernameList(name).Contains(name))
                     {
-                        repo.DeleteUser(usertodelete.Username);
+                        repo.DeleteUser(name);
                     }
                     else
                     {
+                        Console.WriteLine("No username found!");
                         break;
                     }
                     break;
