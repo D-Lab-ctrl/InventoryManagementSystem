@@ -14,6 +14,7 @@ class UserService
     //define a method to create an user 
     public User? CreateUser()
     {
+        RepositoryUser repo = new RepositoryUser();
         //Define a list of acceptable roles to define as credential of the user to register
         List<string> roles = new List<string>{"Admin", "Employee"};
         //Define while loops to iterate over and over until all the registration criterias are met
@@ -23,43 +24,49 @@ class UserService
             string? username = Console.ReadLine();
             if (!string.IsNullOrEmpty(username))
             {
-                while (true)
-                {
-                    Console.WriteLine("Enter the role: ");
-                    string? role = Console.ReadLine();
-                    if (!string.IsNullOrEmpty(role))
+                if(!repo.UsernameList(username).Contains(username)) {
+                    while (true)
                     {
-                        if (roles.Contains(role))
+                        Console.WriteLine("Enter the role: ");
+                        string? role = Console.ReadLine();
+                        if (!string.IsNullOrEmpty(role))
                         {
-                            while (true)
+                            if (roles.Contains(role))
                             {
-                                Console.WriteLine("Enter a password: ");
-                                string? inputPassword = Console.ReadLine();
-
-                                if (passwordValidation(inputPassword))
+                                while (true)
                                 {
-                                    //call password generator code and return hash password and salt
-                                    //create user object then generate password and salt and assign them to the object fields.
+                                    Console.WriteLine("Enter a password: ");
+                                    string? inputPassword = Console.ReadLine();
 
-                                    var user = CreateUserByRole(username, role);
-                                    user.salt = createSalt();
-                                    user.passwordHash = createPasswordHash(inputPassword, user.salt);
-                                    return user;
+                                    if (passwordValidation(inputPassword))
+                                    {
+                                        //call password generator code and return hash password and salt
+                                        //create user object then generate password and salt and assign them to the object fields.
+
+                                        var user = CreateUserByRole(username, role);
+                                        user.salt = createSalt();
+                                        user.passwordHash = createPasswordHash(inputPassword, user.salt);
+                                        return user;
+                                    }
+                                    continue;
                                 }
+                            }
+                            else
+                            {
+                                Console.WriteLine("The role inserted is not valid.\nIt must be either 'Admin' or 'Employee'");
                                 continue;
                             }
                         }
                         else
                         {
-                            Console.WriteLine("The role inserted is not valid.\nIt must be either 'Admin' or 'Employee'");
+                            Console.WriteLine("The role cannot be empty or null.");
                             continue;
                         }
                     }
-                    else
-                    {
-                        Console.WriteLine("The role cannot be empty or null.");
-                        continue;
-                    }
+                }
+                else
+                {
+                    Console.WriteLine("The Username already exist.");
                 }
             }
             else
@@ -137,6 +144,135 @@ class UserService
                 Console.WriteLine("Username cannot be empty or null.");
                 continue;
             }
+        }
+    }
+    public void BasicUserOptions()
+    {
+        OrderService service = new OrderService();
+        while (true)
+        {
+            Console.WriteLine("1.\tPlace Order\n2.\tSee all orders\n3.\tExit\n");
+            int choice;
+            if (int.TryParse(Console.ReadLine(), out choice))
+            {
+                switch (choice)
+                {
+                    case 1:
+                        service.PlaceOrder();
+                        break;
+                    case 2:
+                        service.DisplayOrders();    
+                        break;
+                    case 3:
+                        return;
+                    default:
+                        Console.WriteLine("You must enter a number corresponding to the options available (1, 2, 3)");
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("You must enter a number corresponding to the options available (1, 2, 3)");
+            }
+        }
+    }
+    public void AdminOptions()
+    {
+        OrderService service = new OrderService();
+        while (true)
+        {
+            Console.WriteLine("1.\tManage employee\n2.\tSee all users\n3.\tPlace order\n4.\tSee all orders\n5.\tExit\n");
+            int choice;
+            if (int.TryParse(Console.ReadLine(), out choice))
+            {
+                switch (choice)
+                {
+                    case 1:
+                        ManageUser();
+                        break;
+                    case 2:
+                        DisplayUsers();
+                        break;
+                    case 3:
+                        service.PlaceOrder();
+                        break;
+                    case 4:
+                        service.DisplayOrders();
+                        break;
+                    case 5:
+                        return;
+                    default:
+                        Console.WriteLine("You must enter a number corresponding to the options available (1, 2, 3)");
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("You must enter a number corresponding to the options available (1, 2, 3)");
+            }
+        }
+    }
+    public void ManageUser()
+    {
+        RepositoryUser repo = new RepositoryUser();
+        Console.WriteLine("1.\tEdit User\n2.\tDelete User\n3.\tExit");
+        if(int.TryParse(Console.ReadLine(), out int choice))
+        {
+            switch (choice)
+            {
+                case 1:
+                    Console.WriteLine("Enter the user's username you want to edit the role of: ");
+                    string username = Console.ReadLine();
+                    Console.WriteLine("Enter the new role: ");
+                    string role = Console.ReadLine();
+                    User userToEdit = repo.CheckCredentials(username);
+                    if (userToEdit.Role == "Admin")
+                    {
+                        Console.WriteLine("Cannot change admin credentials!");
+                    }
+                    else
+                    {
+                        repo.EditUserRole(username, role);
+                    }
+                    break;
+                case 2:
+                    Console.WriteLine("Enter the user's username to delete: ");
+                    string? name = Console.ReadLine();
+                    User usertodelete = repo.CheckCredentials(name);
+                    if(usertodelete != null)
+                    {
+                        repo.DeleteUser(usertodelete.Username);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                    break;
+            }
+        }
+        else
+        {
+            Console.WriteLine("You must enter a number corresponding to the options available (1, 2, 3, 4)");
+        }
+    }
+    public void DisplayUsers()
+    {
+        RepositoryUser repo = new RepositoryUser();
+        List<User> userList = new List<User>(repo.GetAll());
+        if (userList.Count > 0)
+        {
+            foreach (User user in userList)
+            {
+                Console.WriteLine("----------------------------------");
+                Console.WriteLine($"User ID: {user.Id}\nUsername: {user.Username}\nRole: {user.Role}");
+                Console.WriteLine("----------------------------------");
+            }
+        }
+        else
+        {
+            Console.WriteLine("----------------------------------");
+            Console.WriteLine("No user found.");
+            Console.WriteLine("----------------------------------");
         }
     }
     public string createSalt()

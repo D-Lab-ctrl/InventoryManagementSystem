@@ -6,32 +6,41 @@ namespace InventoryManagementSystem
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("1.\tLogin\n2.\tRegister\n3.\tExit");
-
-            if (int.TryParse(Console.ReadLine(), out int choice))
-            {
-                if (choice == 1)
+            while (true)
+            {   
+                Console.WriteLine("1.\tLogin\n2.\tRegister\n3.\tExit");
+                if (int.TryParse(Console.ReadLine(), out int choice))
                 {
-                    UserService login = new UserService();
-                    var user = login.LogIn();
-                    if (user != null)
+                    if (choice == 1)
                     {
-                        user.Options();
+                        UserService login = new UserService();
+                        var user = login.LogIn();
+                        if (user != null)
+                        {
+                            user.Options();
+                            continue;
+                        }
+                    }
+                    else if (choice == 2)
+                    {
+                        UserService registration = new UserService();
+                        registration.registerUser();
+                        continue;
+                    }
+                    else if (choice == 3)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("You must insert a number (1, 2 or 3) corresponding to the option number.");
                     }
                 }
-                else if (choice == 2)
+                else
                 {
-                    UserService registration = new UserService();
-                    registration.registerUser();
+                    Console.WriteLine("You must insert a number (1, 2 or 3) corresponding to the option number.");
+                    continue;
                 }
-                else if (choice == 3)
-                {
-                    return;
-                }
-            }
-            else
-            {
-                Console.WriteLine("You must insert a number (1, 2 or 3) corresponding to the option number.");
             }
 
         }

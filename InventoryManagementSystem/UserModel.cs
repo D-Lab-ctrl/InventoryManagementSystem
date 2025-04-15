@@ -2,7 +2,7 @@
 abstract class User
 {
     //Define properties of the user object 
-    public int Id { get; } //Id is a property as it has a getter which allows to read the data stored in Id
+    public int Id { get; set; } //Id is a property as it has a getter which allows to read the data stored in Id
     public string? Username { get; set; }
     public string? Role { get; set; }
     private string? _passwordHash;
@@ -27,7 +27,8 @@ abstract class User
     //defining the method as virtual allows to override it
     public virtual void Options()
     {
-        Console.WriteLine("1.\tPlace Order\n2.\tSee all orders\n3.\tExit\n");
+        UserService service = new UserService();
+        service.BasicUserOptions();
     }
 }
 //create 2 classes that inherit from the user class
@@ -37,7 +38,8 @@ class Admin : User
 
     public override void Options()
     {
-        Console.WriteLine("1.\tManage Employee\n2.\tPlace Order\n3.\tSee all orders\n4.\tExit\n");
+        UserService service = new UserService();
+        service.AdminOptions();
     }
 }
 
@@ -45,4 +47,19 @@ class Employee : User
 {
     public Employee(string username, string role) : base(username, role) { }
 
+}
+
+class Order
+{
+    public int OrderId { get; set; }
+    public int CustomerId { get; set; }
+    public string OrderDate { get; set; }
+    public decimal Total { get; set; }
+
+    public Order(int customerId, string orderDate, decimal total)
+    {
+        CustomerId = customerId;
+        OrderDate = orderDate;
+        Total = total;
+    }
 }
