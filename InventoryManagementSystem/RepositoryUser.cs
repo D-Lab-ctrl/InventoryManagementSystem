@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 class RepositoryUser
 {
     //Define the string which contains the credentials to connect to the database in the sql server 
-    private string _connectionString = "server=127.0.0.1;port=3306;username=root;password=enrico94;database=Company";
+    private string _connectionString = "server=127.0.0.1;port=3306;username=root;password=las;database=Company";
 
     //Define a method to register an user to a table in the database "Company"
     public void Add(User user)

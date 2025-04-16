@@ -2,7 +2,7 @@
 using MySql.Data.MySqlClient;
 class RepositoryOrder
 {
-    private string _connectionString = "server=127.0.0.1;port=3306;username=root;password=enrico94;database=Company";
+    private string _connectionString = "server=127.0.0.1;port=3306;username=root;password=las;database=Company";
     public void Add(Order order)
     {
         try
