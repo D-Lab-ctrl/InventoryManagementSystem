@@ -18,7 +18,7 @@ class RepositoryUser
             using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 //define the query to perform to the database
-                string query = "INSERT INTO Users(Username, Role, Password, Salt) VALUES(@Username, @Role, @Password, @Salt)";
+                string query = "INSERT INTO Users(Username, Name, Surname, Gender, Date_of_birth, Email, Phone_number, Role, Password, Salt) VALUES(@Username, @Name, @Surname, @Gender, @Date_of_birth, @Email, @Phone_number, @Role, @Password, @Salt)";
 
                 //define a command object to execute the query safely to avoid sql injection
                 MySqlCommand cmd = new MySqlCommand(query, connection);
@@ -26,6 +26,12 @@ class RepositoryUser
                 //Connect to the server
                 connection.Open();
                 cmd.Parameters.AddWithValue("@Username", user.Username);
+                cmd.Parameters.AddWithValue("@Name", user.Name);
+                cmd.Parameters.AddWithValue("@Surname", user.Surname);
+                cmd.Parameters.AddWithValue("@Gender", user.Gender);
+                cmd.Parameters.AddWithValue("@Date_of_birth", user.Date);
+                cmd.Parameters.AddWithValue("@Email", user.Email);
+                cmd.Parameters.AddWithValue("@Phone_number", user.PhoneNumber);
                 cmd.Parameters.AddWithValue("@Role", user.Role);
                 cmd.Parameters.AddWithValue("@Password", user.passwordHash);
                 cmd.Parameters.AddWithValue("Salt", user.salt);
@@ -41,14 +47,14 @@ class RepositoryUser
 
     //The method will return a tuple with username, role, password and salt
     //The salt is neccessary to generate a hashed password 
-    public User CheckCredentials(string name)
+    public User GetCredentials(string name)
     {
         try
         {
             using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 //The query select the cell where the username is the name inserted by the user during the login
-                string query = "SELECT Username, Role, Password, Salt FROM Users WHERE Username = @name";
+                string query = "SELECT Id, Username, Role, Password, Salt FROM Users WHERE Username = @name";
                 MySqlCommand cmd = new MySqlCommand(query, connection);
                 connection.Open();
                 cmd.Parameters.AddWithValue("@name", name);
@@ -57,16 +63,18 @@ class RepositoryUser
                 {
                     if (reader.Read())
                     {
+                        int Id = Convert.ToInt32(reader["Id"].ToString());
                         string? username = reader["Username"].ToString();
                         string? role = reader["Role"].ToString();
                         string? passwordHash = reader["Password"].ToString();
                         string? salt = reader["Salt"].ToString();
                         var user = new UserService().CreateUserByRole(username, role);
+                        user.Id = Id;
                         user.passwordHash = passwordHash;
                         user.salt = salt;
                         return user;
                     }
-                    return null;
+                    return default;
                 }
             }
         }

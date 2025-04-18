@@ -4,6 +4,12 @@ abstract class User
     //Define properties of the user object 
     public int Id { get; set; } //Id is a property as it has a getter which allows to read the data stored in Id
     public string? Username { get; set; }
+    public string? Name { get; set; }
+    public string? Surname { get; set; }
+    public char? Gender { get; set; }
+    public string? Date { get; set; }
+    public string? Email { get; set; }
+    public string? PhoneNumber { get; set; }
     public string? Role { get; set; }
     private string? _passwordHash;
     private string? _salt;
@@ -25,10 +31,10 @@ abstract class User
         set { _passwordHash = value; }
     }
     //defining the method as virtual allows to override it
-    public virtual void Options()
+    public virtual void Options(User user)
     {
         UserService service = new UserService();
-        service.BasicUserOptions();
+        service.BasicUserOptions(user);
     }
 }
 //create 2 classes that inherit from the user class
@@ -36,10 +42,10 @@ class Admin : User
 {
     public Admin(string username, string role) : base(username, role) { }
 
-    public override void Options()
+    public override void Options(User user)
     {
         UserService service = new UserService();
-        service.AdminOptions();
+        service.AdminOptions(user);
     }
 }
 
@@ -52,14 +58,80 @@ class Employee : User
 class Order
 {
     public int OrderId { get; set; }
-    public int CustomerId { get; set; }
+    public string CustomerId { get; set; }
     public string OrderDate { get; set; }
-    public decimal Total { get; set; }
+    public double Total { get; set; }
+    public string ShippingAddress { get; set; }
+    public int UserId { get; set; }
 
-    public Order(int customerId, string orderDate, decimal total)
+    public Order(string customerId, string orderDate, double total, string shippingAddress, int userId)
     {
         CustomerId = customerId;
         OrderDate = orderDate;
         Total = total;
+        ShippingAddress = shippingAddress;
+        UserId = userId;
+    }
+}
+
+class Customer
+{
+    public string? Id { get; set; }
+    public string? Name { get; set; }
+    public string? Surname { get; set; }
+    public string? Email { get; set; }
+    public string? Address { get; set; }
+
+    public Customer(string id, string name, string surname, string email, string address)
+    {
+        Id = id;
+        Name = name;
+        Surname = surname;
+        Email = email;
+        Address = address;
+    }
+}
+
+class Product
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public double Price { get; set; }
+    public int StockQty { get; set; }
+    public Product(string id, string name, double price, int stockqty)
+    {
+        Id = id;
+        Name = name;
+        Price = price;
+        StockQty = stockqty;
+    }
+}
+class Report
+{
+    public string OrderId { get; set; }
+    public string ProductId { get; set; }
+    public string ProductName { get; set; }
+    public int Qty { get; set; }
+    public double UnitPrice { get; set; }
+    public string OrderDate { get; set; }
+    public string CustomerId { get; set; }
+    public string CustomerName { get; set; }
+    public string ShippingAddress { get; set; }
+    public string UserId { get; set; }
+    public string UserName { get; set; }
+
+    public Report(string orderId, string productId, string productName, int qty, double unitPrice, string orderDate, string customerId, string customerName, string shippingAddress, string userId, string userName)
+    {
+        OrderId = orderId;
+        ProductId = productId;
+        ProductName = productName;
+        Qty = qty;
+        UnitPrice = unitPrice;
+        orderDate = orderDate;
+        CustomerId = customerId;
+        CustomerName = customerName;
+        ShippingAddress = shippingAddress;
+        UserId = userId;
+        UserName = userName;
     }
 }

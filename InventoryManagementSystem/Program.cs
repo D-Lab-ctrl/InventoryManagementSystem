@@ -17,7 +17,7 @@ namespace InventoryManagementSystem
                         var user = login.LogIn();
                         if (user != null)
                         {
-                            user.Options();
+                            user.Options(user);
                             continue;
                         }
                     }
