@@ -8,74 +8,28 @@ class CustomerService
     {
         try
         {
-            Customer customer = new Customer(CustomerId(), CustomerName(), CustomerSurame(), CustomerEmail(), CustomerAddress());
+            Customer customer = new Customer(repo.GetCustomerId(), GetName("Enter customer's name: "), GetName("Enter customer's surname: "), CustomerEmail(), CustomerAddress());
             repo.Add(customer);
         }catch(Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
     }
-    public Customer? GetCustomerCredentials(string email)
+    public Customer GetCustomerCredentials(string email)
     {
         return repo.GetCredential(email);
     }
-    public string CustomerId()
-    {
-        List<string> listId = repo.GetAllCustomersId();
-        if(listId.Count == 0)
-        {
-            return "CUST1001";
-        }
-
-        string lastID = listId[listId.Count - 1];
-        int sequence = Convert.ToInt32(lastID.Substring(4));
-        int nextnum = sequence + 1;
-        string nextId = "CUST" + nextnum.ToString();
-        return nextId;
-    }
-    public string CustomerName()
+    public string GetName(string prompt)
     {
         while (true)
         {
-            Console.WriteLine("Enter customer name: ");
-            string name = Console.ReadLine();
-            if (!string.IsNullOrEmpty(name))
+            Console.WriteLine(prompt);
+            string input = Console.ReadLine();
+            if (!string.IsNullOrEmpty(input) && Regex.IsMatch(input, @"^[a-zA-Z]+$"))
             {
-                if (Regex.IsMatch(name, @"^[a-zA-Z]+$"))
-                {
-                    return name;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid name. It must contain only alphabetic characters.");
-                    continue;
-                }
+                return input;
             }
-            else
-            {
-                continue;
-            }
-        }
-    }
-    public string CustomerSurame()
-    {
-        while (true)
-        {
-            Console.WriteLine("Enter customer surname: ");
-            string surname = Console.ReadLine();
-            if (string.IsNullOrEmpty(surname))
-            {
-                return CustomerName();
-            }
-            if (Regex.IsMatch(surname, @"^[a-zA-Z]+$"))
-            {
-                return surname;
-            }
-            else
-            {
-                Console.WriteLine("Invalid surname. It must contain only alphabetic characters.");
-                continue;
-            }
+            Console.WriteLine("Invalid name. It must contain only alphabetic characters.");
         }
     }
     public string CustomerEmail()
@@ -86,7 +40,7 @@ class CustomerService
             string email = Console.ReadLine();
             if (string.IsNullOrEmpty(email))
             {
-                return CustomerEmail();
+                continue;
             }
             if (Regex.IsMatch(email, @"^[a-zA-Z0-9._-]+@[a-z]+\.[a-z]{2,}$"))
             {
@@ -107,7 +61,7 @@ class CustomerService
             string address = Console.ReadLine();
             if (string.IsNullOrEmpty(address))
             {
-                return CustomerName();
+                continue;
             }
             else
             {

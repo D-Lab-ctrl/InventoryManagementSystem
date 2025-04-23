@@ -5,23 +5,25 @@ using System.Text.RegularExpressions;
 using System.Data;
 
 class UserService
-{   
-   //define a method to create an user type
-   public User CreateUserByRole(string username, string role)
+{
+    RepositoryUser repo = new RepositoryUser();
+    OrderService service = new OrderService();
+    ProductService product = new ProductService();
+    //define a method to create an user type
+    public User CreateUserByRole(string username, string role)
     {
         return role == "Admin" ? new Admin(username, role) : new Employee(username, role);
     }
 
     //define a method to create an user 
-    public User? CreateUser()
+    public User CreateUser()
     {
-        RepositoryUser repo = new RepositoryUser();
         string role = repo.GetAll().Count == 0 ? "Admin" : "";
         string username;
         while (true)
         {
             username = UserUsername();
-            if (!UsernameExist(username))
+            if (UsernameExist(username) == null)
             {
                 break;
             }
@@ -45,8 +47,8 @@ class UserService
         user.Email = email;
         user.PhoneNumber = phone;
         user.Role = role;
-        user.passwordHash = password;
-        user.salt = salt;
+        user.PasswordHash = password;
+        user.Salt = salt;
         return user;
     }
 
@@ -54,7 +56,6 @@ class UserService
    public void registerUser()
     {
         var user = CreateUser();
-        RepositoryUser repo = new RepositoryUser();
         try
         {
             repo.Add(user);
@@ -71,51 +72,53 @@ class UserService
     //Define a method where the user give in input username and password and then the result fetched by
     //the repository is compared with the input to see if there is a match and therefore if the login is valid
     //add while loop to keep trying to log in
-    public User? LogIn()
+    public User LogIn()
     {
         string? username;
         while (true)
         {
             Console.WriteLine("Username: ");
             username = Console.ReadLine();
-            if (UsernameExist(username))
+            if (UsernameExist(username) != null)
             {
                 break;
             }
             Console.WriteLine("No account has this username!");
         }
-        RepositoryUser repo = new RepositoryUser();
         var user = repo.GetCredentials(username);
-        if(user.Role == "" || user.Role == null)
+        if(user.Role == "")
         {
             Console.WriteLine("Access denied! Admin needs to approve your registration");
             return LogIn();
         }
-        string? inputPassword;
+        string inputPassword;
         while (true)
         {
             Console.WriteLine("Enter the password: ");
             inputPassword = Console.ReadLine();
             if (!string.IsNullOrEmpty(inputPassword))
             {
-                break;
+                string passwordHash = createPasswordHash(inputPassword, user.Salt);
+                if (passwordHash == user.PasswordHash)
+                {
+                    Console.WriteLine("You are logged in!");
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("The password is wrong!");
+                    continue;
+                }
             }
-        }        
-        string passwordHash = createPasswordHash(inputPassword, user.salt);
-        if(passwordHash == user.passwordHash)
-        {
-            Console.WriteLine("You are logged in!");
-            return user;
+            else
+            {
+                continue;
+            }
         }
-        else
-        {
-            Console.WriteLine("The password is wrong!");
-            return LogIn();
-        }
+        return user;
     }
     public void BasicUserOptions(User user)
     {
-        OrderService service = new OrderService();
         while (true)
         {
             Console.WriteLine("1.\tPlace Order\n2.\tSee all orders\n3.\tSee products\n4.\tPrint order details\n5.\tExit\n");
@@ -131,12 +134,10 @@ class UserService
                         service.DisplayOrders();    
                         break;
                     case 3:
-                        ProductService product = new ProductService();
                         product.DisplayProducts();
                         break;
                     case 4:
-                        OrderService serviceOrd = new OrderService();
-                        serviceOrd.PrintReport();
+                        service.PrintReport();
                         break;
                     case 5:
                         return;
@@ -153,7 +154,6 @@ class UserService
     }
     public void AdminOptions(User user)
     {
-        OrderService service = new OrderService();
         while (true)
         {
             Console.WriteLine("1.\tManage employee\n2.\tSee all users\n3.\tPlace order\n4.\tSee all orders\n5.\tSee products\n6.\tPrint order details\n7.\tExit\n");
@@ -175,12 +175,10 @@ class UserService
                         service.DisplayOrders();
                         break;
                     case 5:
-                        ProductService product = new ProductService();
                         product.DisplayProducts();
                         break;
                     case 6:
-                        OrderService serviceOrd = new OrderService();
-                        serviceOrd.PrintReport();
+                        service.PrintReport();
                         break;
                     case 7:
                         return;
@@ -197,7 +195,6 @@ class UserService
     }
     public void ManageUser()
     {
-        RepositoryUser repo = new RepositoryUser();
         Console.WriteLine("1.\tConfirm user registration\n2.\tDelete User\n3.\tExit");
         if(int.TryParse(Console.ReadLine(), out int choice))
         {
@@ -206,7 +203,7 @@ class UserService
                 case 1:
                     Console.WriteLine("Enter the username you want to approve the registration of: ");
                     string username = Console.ReadLine();
-                    if (repo.UsernameList(username).Contains(username))
+                    if (UsernameExist(username) != null)
                     {
                         if (repo.GetCredentials(username).Role == "")
                         {
@@ -235,8 +232,8 @@ class UserService
                         
                 case 2:
                     Console.WriteLine("Enter the user's username to delete: ");
-                    string? name = Console.ReadLine();
-                    if (repo.UsernameList(name).Contains(name))
+                    string name = Console.ReadLine();
+                    if (UsernameExist(name) != null)
                     {
                         repo.DeleteUser(name);
                     }
@@ -255,7 +252,6 @@ class UserService
     }
     public void DisplayUsers()
     {
-        RepositoryUser repo = new RepositoryUser();
         List<User> userList = new List<User>(repo.GetAll());
         if (userList.Count > 0)
         {
@@ -315,7 +311,7 @@ class UserService
         while (true)
         {
             Console.WriteLine("Enter a password: ");
-            string? inputPassword = Console.ReadLine();
+            string inputPassword = Console.ReadLine();
 
             if (passwordValidation(inputPassword))
             {
@@ -434,13 +430,6 @@ class UserService
             }
         }
     }
-    public string UserRole()
-    {
-        while (true)
-        {
-            //Set by Admin
-        }
-    }
     public string UserDateOfBirth()
     {
         while (true)
@@ -460,37 +449,12 @@ class UserService
     }
     public bool isDateValid(string date)
     {
-        return DateOnly.TryParseExact(date, "yyyy-mm-dd", null, System.Globalization.DateTimeStyles.None, out _);
+        return DateOnly.TryParseExact(date, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out _);
     }
-    public bool UsernameExist(string username)
+    public User UsernameExist(string username)
     {
-        RepositoryUser repo = new RepositoryUser();
-        if(repo.GetCredentials(username) == null)
-        {
-            return false;
-        }
+        var user = repo.GetCredentials(username);
 
-        if (repo.GetCredentials(username).Username == username)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    public bool IsAdmin(string username)
-    {
-        RepositoryUser repo = new RepositoryUser();
-        User user = repo.GetCredentials(username);
-        if(user.Role == "Admin")
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-
+        return (user != null && user.Username == username) ? user : null;
     }
 }

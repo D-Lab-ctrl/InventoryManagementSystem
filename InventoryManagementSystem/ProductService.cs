@@ -49,15 +49,6 @@ class ProductService
             }
         }
     }
-    public bool IsEnoughStock(string Id, int amount)
-    {
-        Product product = repo.GetProductsInfo(Id);
-        if(amount <= product.StockQty)
-        {
-            return true;
-        }
-        return false;
-    }
     public string FindProduct()
     {
         while (true)

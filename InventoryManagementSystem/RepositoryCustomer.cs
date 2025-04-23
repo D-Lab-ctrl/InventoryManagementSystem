@@ -24,7 +24,7 @@ class RepositoryCustomer
             cmd.ExecuteNonQuery();
         }
     }
-    public Customer? GetCredential(string email)
+    public Customer GetCredential(string email)
     {
         using(MySqlConnection connection = new MySqlConnection(_connectionString))
         {
@@ -46,11 +46,25 @@ class RepositoryCustomer
                         reader["Address"].ToString()
                         );
                 }
-                return default;
+                return null;
             }
         }
     }
+    public string GetCustomerId()
+    {
 
+        List<string> listId = GetAllCustomersId();
+        if (listId.Count == 0)
+        {
+            return "CUST1001";
+        }
+
+        string lastID = listId[listId.Count - 1];
+        int sequence = Convert.ToInt32(lastID.Substring(4));
+        int nextnum = sequence + 1;
+        string nextId = "CUST" + nextnum.ToString();
+        return nextId;
+    }
     public List<string> GetAllCustomersId()
     {
         List<string> customerIdlist = new List<string>();

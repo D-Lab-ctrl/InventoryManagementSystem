@@ -56,37 +56,6 @@ class RepositoryProduct
             }
         }
     }
-
-    public List<string> ProductIdList()
-    {
-        List<string> productIdList = new List<string>();
-        try
-        {
-            using (MySqlConnection connection = new MySqlConnection(_connectionString))
-            {
-                //The query select the cell where the username is the name inserted by the user during the login
-                string query = "SELECT Id FROM products";
-                MySqlCommand cmd = new MySqlCommand(query, connection);
-                connection.Open();
-
-                using (MySqlDataReader reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        string? Id = reader["Id"].ToString();
-                        productIdList.Add(Id);
-                    }
-                    return productIdList;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return productIdList;
-        }
-    }
-
     public void UpdateStock(Product product, int qty)
     {
         using (MySqlConnection connection = new MySqlConnection(_connectionString))

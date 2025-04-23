@@ -33,8 +33,8 @@ class RepositoryUser
                 cmd.Parameters.AddWithValue("@Email", user.Email);
                 cmd.Parameters.AddWithValue("@Phone_number", user.PhoneNumber);
                 cmd.Parameters.AddWithValue("@Role", user.Role);
-                cmd.Parameters.AddWithValue("@Password", user.passwordHash);
-                cmd.Parameters.AddWithValue("Salt", user.salt);
+                cmd.Parameters.AddWithValue("@Password", user.PasswordHash);
+                cmd.Parameters.AddWithValue("Salt", user.Salt);
 
                 cmd.ExecuteNonQuery();
             }
@@ -70,11 +70,11 @@ class RepositoryUser
                         string? salt = reader["Salt"].ToString();
                         var user = new UserService().CreateUserByRole(username, role);
                         user.Id = Id;
-                        user.passwordHash = passwordHash;
-                        user.salt = salt;
+                        user.PasswordHash = passwordHash;
+                        user.Salt = salt;
                         return user;
                     }
-                    return default;
+                    return null;
                 }
             }
         }
@@ -157,36 +157,6 @@ class RepositoryUser
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-        }
-    }
-    public List<string> UsernameList(string name)
-    {
-        List<string> usernameList = new List<string>();
-        try
-        {
-            using (MySqlConnection connection = new MySqlConnection(_connectionString))
-            {
-                //The query select the cell where the username is the name inserted by the user during the login
-                string query = "SELECT Username FROM users WHERE Username = @name";
-                MySqlCommand cmd = new MySqlCommand(query, connection);
-                connection.Open();
-                cmd.Parameters.AddWithValue("@name", name);
-
-                using (MySqlDataReader reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        string? username = reader["Username"].ToString();
-                        usernameList.Add(username);
-                    }
-                    return usernameList;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return usernameList;
         }
     }
 }

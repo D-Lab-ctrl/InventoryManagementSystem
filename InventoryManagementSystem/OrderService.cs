@@ -1,5 +1,4 @@
 ﻿using System;
-using Mysqlx.Session;
 class OrderService
 {
     RepositoryOrder repoOrd = new RepositoryOrder();
@@ -8,7 +7,7 @@ class OrderService
     ProductService serviceProd = new ProductService();
     public void PlaceOrder(User user)
     {
-        if (repoProd.ProductIdList().Count == 0)
+        if (repoProd.GetProducts().Count == 0)
         {
             Console.WriteLine("The are not products in the catalogue!");
             return;
@@ -17,10 +16,11 @@ class OrderService
         List<Tuple<Product, int>> productList = serviceProd.InsertProducts();
 
         double Total = TotalAmount(productList);
-        if (Total == 0)
+        while (Total == 0)
         {
             Console.WriteLine("You must insert products to the order.");
-            serviceProd.InsertProducts();
+            productList = serviceProd.InsertProducts();
+            Total = TotalAmount(productList);
         }
 
         //Insert Customer email
@@ -66,7 +66,7 @@ class OrderService
             }
             else
             {
-                Console.WriteLine("Invalid input. The date must be of the format: yyyt-MM-dd.");
+                Console.WriteLine("Invalid input. The date must be of the format: yyyy-MM-dd.");
                 continue;
             }
         }
@@ -91,10 +91,7 @@ class OrderService
             {
                 return address;
             }
-            else
-            {
-                return ShippingAddress();
-            }
+            Console.WriteLine("Address cannot be empty. Please try again.");
         }
     }
     public bool ValidateDate(string date)
@@ -122,45 +119,47 @@ class OrderService
     }
     public void PrintReport()
     {
-        if (repoOrd.GetAllOrdersId().Count == 0)
+        while (true)
         {
-            Console.WriteLine("No order was processed.");
-            return;
-        }
-        Console.WriteLine("Insert Order Id: ");
-        if (int.TryParse(Console.ReadLine(), out int orderId)) {
-            if (repoOrd.GetAllOrdersId().Contains(orderId.ToString()))
+            if (repoOrd.GetAllOrdersId().Count == 0)
             {
-                List<Report> report = repoOrd.GetOrderDetailsByOrderId(orderId);
-                Console.WriteLine(new string('-', 50));
-                Console.WriteLine("ORDER DETAILS");
-                Console.WriteLine(new string('-', 50));
-                Console.WriteLine($"Order ID: {report[0].OrderId}");
-                string productTitle = $"Products:       {report[0].Qty} x {report[0].ProductName}({report[0].ProductId})";
-                if (report.Count > 1)
+                Console.WriteLine("No order was processed.");
+                return;
+            }
+            Console.WriteLine("Insert Order Id: ");
+            if (int.TryParse(Console.ReadLine(), out int orderId))
+            {
+                if (repoOrd.GetAllOrdersId().Contains(orderId.ToString()))
                 {
-                    for (int i = 1; i < report.Count; i++)
+                    List<Report> report = repoOrd.GetOrderDetailsByOrderId(orderId);
+                    Console.WriteLine(new string('-', 50));
+                    Console.WriteLine("ORDER DETAILS");
+                    Console.WriteLine(new string('-', 50));
+                    Console.WriteLine($"Order ID: {report[0].OrderId}");
+                    string productTitle = $"Products:       {report[0].Qty} x {report[0].ProductName}({report[0].ProductId})";
+                    if (report.Count > 1)
                     {
-                        productTitle += $"\n                  {report[i].Qty} x {report[i].ProductName}({report[i].ProductId})";
+                        for (int i = 1; i < report.Count; i++)
+                        {
+                            productTitle += $"\n                  {report[i].Qty} x {report[i].ProductName}({report[i].ProductId})";
+                        }
                     }
+                    Console.WriteLine(productTitle);
+                    Console.WriteLine($"Customer: {report[0].CustomerName}({report[0].CustomerId})");
+                    Console.WriteLine($"Shipped to: {report[0].ShippingAddress}");
+                    Console.WriteLine($"Processed by: {report[0].UserName}({report[0].UserId})");
+                    Console.WriteLine(new string('-', 50));
+                    break;
                 }
-                Console.WriteLine(productTitle);
-                Console.WriteLine($"Customer: {report[0].CustomerName}({report[0].CustomerId})");
-                Console.WriteLine($"Shipped to: {report[0].ShippingAddress}");
-                Console.WriteLine($"Processed by: {report[0].UserName}({report[0].UserId})");
-                Console.WriteLine(new string('-', 50));
+                else
+                {
+                    Console.WriteLine($"There is no order Id = {orderId}");
+                }
             }
             else
             {
-                Console.WriteLine($"There is no order Id = {orderId}");
-                PrintReport();
+                Console.WriteLine("Invalid input. The order ID must be a number.");
             }
         }
-        else
-        {
-            Console.WriteLine("Invalid input. The order ID must be a number.");
-            PrintReport();
-        }
-
     }
 }

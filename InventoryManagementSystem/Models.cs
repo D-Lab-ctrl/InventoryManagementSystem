@@ -3,16 +3,16 @@ abstract class User
 {
     //Define properties of the user object 
     public int Id { get; set; } //Id is a property as it has a getter which allows to read the data stored in Id
-    public string? Username { get; set; }
-    public string? Name { get; set; }
-    public string? Surname { get; set; }
+    public string Username { get; set; }
+    public string Name { get; set; }
+    public string Surname { get; set; }
     public char? Gender { get; set; }
-    public string? Date { get; set; }
-    public string? Email { get; set; }
-    public string? PhoneNumber { get; set; }
-    public string? Role { get; set; }
-    private string? _passwordHash;
-    private string? _salt;
+    public string Date { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Role { get; set; }
+    private string _passwordHash;
+    private string _salt;
 
     //Define the constructor that takes 2 arguments to initialise an object of type User
     public User(string username, string role)
@@ -20,12 +20,12 @@ abstract class User
         Username = username;
         Role = role;
     }
-    public string salt
+    public string Salt
     {
         get { return _salt; }
         set { _salt = value; }
     }
-    public string passwordHash
+    public string PasswordHash
     {
         get { return _passwordHash; }
         set { _passwordHash = value; }
@@ -76,11 +76,11 @@ class Order
 
 class Customer
 {
-    public string? Id { get; set; }
-    public string? Name { get; set; }
-    public string? Surname { get; set; }
-    public string? Email { get; set; }
-    public string? Address { get; set; }
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public string Surname { get; set; }
+    public string Email { get; set; }
+    public string Address { get; set; }
 
     public Customer(string id, string name, string surname, string email, string address)
     {
@@ -127,7 +127,7 @@ class Report
         ProductName = productName;
         Qty = qty;
         UnitPrice = unitPrice;
-        orderDate = orderDate;
+        OrderDate = orderDate;
         CustomerId = customerId;
         CustomerName = customerName;
         ShippingAddress = shippingAddress;
