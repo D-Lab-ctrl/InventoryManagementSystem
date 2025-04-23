@@ -8,6 +8,7 @@ namespace InventoryManagementSystem
         public static void Main(string[] args)
         {
             var serviceProvider = new ServiceCollection()
+                .AddScoped<IRepositoryUser, RepositoryUser>()
                 .AddScoped<IUserService, UserService>()
                 .AddScoped<IOrderService, OrderService>()
                 .AddScoped<IProductService, ProductService>()
@@ -24,8 +25,10 @@ namespace InventoryManagementSystem
                         var user = loginService.LogIn();
                         if (user != null)
                         {
-                            user.Options(user);
-                            continue;
+                            if (user is Admin)
+                                loginService.AdminOptions(user);
+                            else
+                                loginService.BasicUserOptions(user);
                         }
                     }
                     else if (choice == 2)

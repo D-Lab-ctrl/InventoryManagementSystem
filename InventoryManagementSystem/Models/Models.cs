@@ -30,23 +30,11 @@ public abstract class User
         get { return _passwordHash; }
         set { _passwordHash = value; }
     }
-    //defining the method as virtual allows to override it
-    public virtual void Options(User user)
-    {
-        UserService service = new UserService();
-        service.BasicUserOptions(user);
-    }
 }
 //create 2 classes that inherit from the user class
 class Admin : User
 {
     public Admin(string username, string role) : base(username, role) { }
-
-    public override void Options(User user)
-    {
-        UserService service = new UserService();
-        service.AdminOptions(user);
-    }
 }
 
 class Employee : User

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using MySql.Data.MySqlClient;
 
 //create a repository, which acts as intermediary between the code and the sql server
@@ -64,11 +65,11 @@ class RepositoryUser : IRepositoryUser
                     if (reader.Read())
                     {
                         int Id = Convert.ToInt32(reader["Id"].ToString());
-                        string? username = reader["Username"].ToString();
-                        string? role = reader["Role"].ToString();
-                        string? passwordHash = reader["Password"].ToString();
-                        string? salt = reader["Salt"].ToString();
-                        var user = new UserService().CreateUserByRole(username, role);
+                        string username = reader["Username"].ToString();
+                        string role = reader["Role"].ToString();
+                        string passwordHash = reader["Password"].ToString();
+                        string salt = reader["Salt"].ToString();
+                        User user = (role == "Admin") ? new Admin(username, role) : new Employee(username, role);
                         user.Id = Id;
                         user.PasswordHash = passwordHash;
                         user.Salt = salt;
@@ -91,7 +92,6 @@ class RepositoryUser : IRepositoryUser
         {
             using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
-                UserService service = new UserService();
                 string query = "SELECT * FROM users";
                 MySqlCommand cmd = new MySqlCommand(query, connection);
 
@@ -101,10 +101,10 @@ class RepositoryUser : IRepositoryUser
                     while (reader.Read())
                     {
                         int Id = Convert.ToInt32(reader["Id"]);
-                        string? Username = reader["Username"].ToString();
-                        string? Role = reader["Role"].ToString();
+                        string Username = reader["Username"].ToString();
+                        string Role = reader["Role"].ToString();
 
-                        User user = service.CreateUserByRole(Username, Role);
+                        User user = (Role == "Admin") ? new Admin(Username, Role) : new Employee(Username, Role);
                         user.Id = Id;
                         userList.Add(user);
                     }
