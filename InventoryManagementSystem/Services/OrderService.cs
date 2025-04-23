@@ -1,10 +1,11 @@
 ﻿using System;
-class OrderService
+class OrderService : IOrderService
 {
     RepositoryOrder repoOrd = new RepositoryOrder();
     RepositoryProduct repoProd = new RepositoryProduct();
     CustomerService serviceCust = new CustomerService();
-    ProductService serviceProd = new ProductService();
+    public readonly IProductService productService;
+
     public void PlaceOrder(User user)
     {
         if (repoProd.GetProducts().Count == 0)
@@ -13,13 +14,13 @@ class OrderService
             return;
         }
 
-        List<Tuple<Product, int>> productList = serviceProd.InsertProducts();
+        List<Tuple<Product, int>> productList = productService.InsertProducts();
 
         double Total = TotalAmount(productList);
         while (Total == 0)
         {
             Console.WriteLine("You must insert products to the order.");
-            productList = serviceProd.InsertProducts();
+            productList = productService.InsertProducts();
             Total = TotalAmount(productList);
         }
 

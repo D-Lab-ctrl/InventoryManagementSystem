@@ -1,5 +1,5 @@
 ﻿using System;
-abstract class User
+public abstract class User
 {
     //Define properties of the user object 
     public int Id { get; set; } //Id is a property as it has a getter which allows to read the data stored in Id
@@ -92,7 +92,7 @@ class Customer
     }
 }
 
-class Product
+public class Product
 {
     public string Id { get; set; }
     public string Name { get; set; }

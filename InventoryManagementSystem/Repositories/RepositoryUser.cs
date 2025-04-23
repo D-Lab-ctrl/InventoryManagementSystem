@@ -2,7 +2,7 @@
 using MySql.Data.MySqlClient;
 
 //create a repository, which acts as intermediary between the code and the sql server
-class RepositoryUser
+class RepositoryUser : IRepositoryUser
 {
     //Define the string which contains the credentials to connect to the database in the sql server 
     private string _connectionString = "server=127.0.0.1;port=3306;username=root;password=las;database=Company";

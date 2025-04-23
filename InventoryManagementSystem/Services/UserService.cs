@@ -4,11 +4,19 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Data;
 
-class UserService
+class UserService : IUserService
 {
-    RepositoryUser repo = new RepositoryUser();
-    OrderService service = new OrderService();
-    ProductService product = new ProductService();
+    private readonly IRepositoryUser _repo;
+    private readonly IOrderService _orderService;
+    private readonly IProductService _productService;
+
+    public UserService(IRepositoryUser repo, IOrderService orderService, IProductService productService)
+    {
+        _repo = repo;
+        _orderService = orderService;
+        _productService = productService;
+    }
+
     //define a method to create an user type
     public User CreateUserByRole(string username, string role)
     {
@@ -18,7 +26,7 @@ class UserService
     //define a method to create an user 
     public User CreateUser()
     {
-        string role = repo.GetAll().Count == 0 ? "Admin" : "";
+        string role = _repo.GetAll().Count == 0 ? "Admin" : "";
         string username;
         while (true)
         {
@@ -58,7 +66,7 @@ class UserService
         var user = CreateUser();
         try
         {
-            repo.Add(user);
+            _repo.Add(user);
             Console.WriteLine("Registration completed!");
         }
         catch(Exception ex)
@@ -85,7 +93,7 @@ class UserService
             }
             Console.WriteLine("No account has this username!");
         }
-        var user = repo.GetCredentials(username);
+        var user = _repo.GetCredentials(username);
         if(user.Role == "")
         {
             Console.WriteLine("Access denied! Admin needs to approve your registration");
@@ -128,16 +136,16 @@ class UserService
                 switch (choice)
                 {
                     case 1:
-                        service.PlaceOrder(user);
+                        _orderService.PlaceOrder(user);
                         break;
                     case 2:
-                        service.DisplayOrders();    
+                        _orderService.DisplayOrders();    
                         break;
                     case 3:
-                        product.DisplayProducts();
+                        _productService.DisplayProducts();
                         break;
                     case 4:
-                        service.PrintReport();
+                        _orderService.PrintReport();
                         break;
                     case 5:
                         return;
@@ -169,16 +177,16 @@ class UserService
                         DisplayUsers();
                         break;
                     case 3:
-                        service.PlaceOrder(user);
+                        _orderService.PlaceOrder(user);
                         break;
                     case 4:
-                        service.DisplayOrders();
+                        _orderService.DisplayOrders();
                         break;
                     case 5:
-                        product.DisplayProducts();
+                        _productService.DisplayProducts();
                         break;
                     case 6:
-                        service.PrintReport();
+                        _orderService.PrintReport();
                         break;
                     case 7:
                         return;
@@ -205,7 +213,7 @@ class UserService
                     string username = Console.ReadLine();
                     if (UsernameExist(username) != null)
                     {
-                        if (repo.GetCredentials(username).Role == "")
+                        if (_repo.GetCredentials(username).Role == "")
                         {
                             Console.WriteLine("Enter the new role: ");
 
@@ -215,7 +223,7 @@ class UserService
                                 Console.WriteLine("The role must be either 'Admin' or 'Employee'");
                                 break; 
                             }
-                            repo.EditUserRole(username, role);
+                            _repo.EditUserRole(username, role);
                             break;
                         }
                         else
@@ -235,7 +243,7 @@ class UserService
                     string name = Console.ReadLine();
                     if (UsernameExist(name) != null)
                     {
-                        repo.DeleteUser(name);
+                        _repo.DeleteUser(name);
                     }
                     else
                     {
@@ -252,7 +260,7 @@ class UserService
     }
     public void DisplayUsers()
     {
-        List<User> userList = new List<User>(repo.GetAll());
+        List<User> userList = new List<User>(_repo.GetAll());
         if (userList.Count > 0)
         {
             foreach (User user in userList)
@@ -453,7 +461,7 @@ class UserService
     }
     public User UsernameExist(string username)
     {
-        var user = repo.GetCredentials(username);
+        var user = _repo.GetCredentials(username);
 
         return (user != null && user.Username == username) ? user : null;
     }

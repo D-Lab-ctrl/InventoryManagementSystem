@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace InventoryManagementSystem
 {
@@ -6,6 +7,12 @@ namespace InventoryManagementSystem
     {
         public static void Main(string[] args)
         {
+            var serviceProvider = new ServiceCollection()
+                .AddScoped<IUserService, UserService>()
+                .AddScoped<IOrderService, OrderService>()
+                .AddScoped<IProductService, ProductService>()
+                .BuildServiceProvider();
+
             while (true)
             {   
                 Console.WriteLine("1.\tLogin\n2.\tRegister\n3.\tExit");
@@ -13,8 +20,8 @@ namespace InventoryManagementSystem
                 {
                     if (choice == 1)
                     {
-                        UserService login = new UserService();
-                        var user = login.LogIn();
+                        var loginService = serviceProvider.GetService<IUserService>();
+                        var user = loginService.LogIn();
                         if (user != null)
                         {
                             user.Options(user);
@@ -23,7 +30,7 @@ namespace InventoryManagementSystem
                     }
                     else if (choice == 2)
                     {
-                        UserService registration = new UserService();
+                        var registration = serviceProvider.GetService<IUserService>();
                         registration.registerUser();
                         continue;
                     }

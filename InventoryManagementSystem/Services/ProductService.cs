@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Org.BouncyCastle.Asn1;
 
-class ProductService
+class ProductService : IProductService
 {
     RepositoryProduct repo = new RepositoryProduct();
     public void DisplayProducts()
